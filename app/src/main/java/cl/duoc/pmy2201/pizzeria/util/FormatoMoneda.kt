@@ -10,7 +10,7 @@ import java.util.Locale
  */
 object FormatoMoneda {
 
-    private val formato: DecimalFormat = DecimalFormat("#,##0", DecimalFormatSymbols(Locale.of("es", "CL"))).apply {
+    private val formato: DecimalFormat = DecimalFormat("#,##0", DecimalFormatSymbols(Locale.forLanguageTag("es-CL"))).apply {
         roundingMode = RoundingMode.HALF_UP
     }
 

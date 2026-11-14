@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">PizzeriaApp</string>
+    <string name="mensaje_bienvenida">Bienvenidos a la mejor pizzería de la ciudad</string>
+    <string name="titulo_carta">Carta disponible</string>
+    <string name="leyenda_promocionable">★: Participa en promociones</string>
+    <string name="carta_vacia">No hay pizzas disponibles.</string>
 </resources>
