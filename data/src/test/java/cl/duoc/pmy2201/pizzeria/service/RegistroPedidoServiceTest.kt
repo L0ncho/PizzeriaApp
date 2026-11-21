@@ -3,6 +3,7 @@ package cl.duoc.pmy2201.pizzeria.service
 import cl.duoc.pmy2201.pizzeria.data.InventarioRepository
 import cl.duoc.pmy2201.pizzeria.data.RepartidorRepository
 import cl.duoc.pmy2201.pizzeria.model.Categoria
+import cl.duoc.pmy2201.pizzeria.model.ItemPedido
 import cl.duoc.pmy2201.pizzeria.model.PizzaClasica
 import cl.duoc.pmy2201.pizzeria.model.Producto
 import cl.duoc.pmy2201.pizzeria.model.Repartidor
@@ -37,6 +38,12 @@ class RegistroPedidoServiceTest {
         ingredientes = mapOf("Masa" to 1, "Pepperoni" to 80)
     )
 
+    private val napolitana: PizzaClasica = PizzaClasica(
+        nombre = "Napolitana",
+        precio = 10990.0,
+        ingredientes = mapOf("Masa" to 1, "Tomate" to 150)
+    )
+
     private val cuatroQuesos: Producto = Producto(
         nombre = "Cuatro Quesos",
         precio = 13990.0,
@@ -48,6 +55,7 @@ class RegistroPedidoServiceTest {
         val inventario: MutableMap<String, Int> = mutableMapOf(
             "Masa" to 40,
             "Pepperoni" to 2000,
+            "Tomate" to 1500,
             "Queso mozzarella" to 8000,
             "Queso azul" to 150
         )
@@ -64,16 +72,14 @@ class RegistroPedidoServiceTest {
     private fun solicitudDeAna(
         correo: String = "ana@example.com",
         telefono: String = "+56931717552",
-        producto: Producto? = pepperoni,
-        cantidad: String = "1",
+        cantidades: Map<Producto, Int> = mapOf(pepperoni to 1),
         direccion: String = "Av. Siempre Viva 123"
     ): SolicitudPedido = SolicitudPedido(
         nombre = "Ana Pérez",
         telefono = telefono,
         correo = correo,
         direccion = direccion,
-        producto = producto,
-        cantidad = cantidad,
+        cantidades = cantidades,
         notas = ""
     )
 
@@ -82,31 +88,34 @@ class RegistroPedidoServiceTest {
         telefono = "+56987654321",
         correo = "pedro@example.com",
         direccion = "Calle Falsa 456",
-        producto = pepperoni,
-        cantidad = "1",
+        cantidades = mapOf(pepperoni to 1),
         notas = ""
     )
 
     @Test
     fun datosInvalidosRetornanTodosLosCamposSinRegistrarNada() {
         val registro: RegistroPedidoService = crearRegistro()
-        val todosLosCampos: Set<CampoPedido> = CampoPedido.entries.toSet()
+        val camposCliente: Set<CampoPedido> =
+            setOf(CampoPedido.NOMBRE, CampoPedido.TELEFONO, CampoPedido.CORREO, CampoPedido.DIRECCION)
+        val casos: Map<Map<Producto, Int>, CampoPedido> = mapOf(
+            emptyMap<Producto, Int>() to CampoPedido.PRODUCTO,
+            mapOf<Producto, Int>(pepperoni to 101) to CampoPedido.CANTIDAD
+        )
 
-        listOf("0", "abc", "101").forEach { cantidad: String ->
+        casos.forEach { (cantidades: Map<Producto, Int>, campoPizzas: CampoPedido) ->
             val solicitud: SolicitudPedido = SolicitudPedido(
                 nombre = "A",
                 telefono = "123",
                 correo = "ana@",
                 direccion = "Av 1",
-                producto = null,
-                cantidad = cantidad,
+                cantidades = cantidades,
                 notas = ""
             )
 
             val resultado: ResultadoSolicitud = registro.registrar(solicitud)
 
             val invalidos: ResultadoSolicitud.DatosInvalidos = assertIs<ResultadoSolicitud.DatosInvalidos>(resultado)
-            assertEquals(todosLosCampos, invalidos.campos)
+            assertEquals(camposCliente + campoPizzas, invalidos.campos)
         }
         val resumen: ResumenDia = registro.resumen()
         assertEquals(0, resumen.totalClientes)
@@ -163,7 +172,7 @@ class RegistroPedidoServiceTest {
     fun pedidoSinStockAgregaAlClienteNuevoSinRegistrarPedido() {
         val registro: RegistroPedidoService = crearRegistro()
 
-        val resultado: ResultadoSolicitud = registro.registrar(solicitudDeAna(producto = cuatroQuesos, cantidad = "3"))
+        val resultado: ResultadoSolicitud = registro.registrar(solicitudDeAna(cantidades = mapOf(cuatroQuesos to 3)))
 
         val sinStock: ResultadoSolicitud.SinStock = assertIs<ResultadoSolicitud.SinStock>(resultado)
         assertTrue("Queso azul" in sinStock.ingredientesFaltantes)
@@ -174,9 +183,9 @@ class RegistroPedidoServiceTest {
     @Test
     fun primerPedidoRegistradoTrasSinStockNoEsRecurrente() {
         val registro: RegistroPedidoService = crearRegistro()
-        registro.registrar(solicitudDeAna(producto = cuatroQuesos, cantidad = "3"))
+        registro.registrar(solicitudDeAna(cantidades = mapOf(cuatroQuesos to 3)))
 
-        val resultado: ResultadoSolicitud = registro.registrar(solicitudDeAna(producto = pepperoni, cantidad = "1"))
+        val resultado: ResultadoSolicitud = registro.registrar(solicitudDeAna(cantidades = mapOf(pepperoni to 1)))
 
         val registrado: ResultadoSolicitud.Registrado = assertIs<ResultadoSolicitud.Registrado>(resultado)
         assertFalse(registrado.clienteRecurrente)
@@ -226,5 +235,57 @@ class RegistroPedidoServiceTest {
         val registrado: ResultadoSolicitud.Registrado = assertIs<ResultadoSolicitud.Registrado>(resultado)
         assertEquals("Calle Oficina 789", registrado.pedido.direccionEntrega)
         assertEquals("Av. Siempre Viva 123", registrado.pedido.cliente.direccion)
+    }
+
+    @Test
+    fun pedidoConVariasPizzasQuedaRegistradoConTodosLosItems() {
+        val registro: RegistroPedidoService = crearRegistro()
+
+        val resultado: ResultadoSolicitud = registro.registrar(
+            solicitudDeAna(cantidades = mapOf(pepperoni to 2, napolitana to 1))
+        )
+
+        val registrado: ResultadoSolicitud.Registrado = assertIs<ResultadoSolicitud.Registrado>(resultado)
+        assertEquals(
+            listOf(ItemPedido(producto = pepperoni, cantidad = 2), ItemPedido(producto = napolitana, cantidad = 1)),
+            registrado.pedido.items
+        )
+    }
+
+    @Test
+    fun pizzasConCantidadCeroSeIgnoran() {
+        val registro: RegistroPedidoService = crearRegistro()
+
+        val resultado: ResultadoSolicitud = registro.registrar(
+            solicitudDeAna(cantidades = mapOf(pepperoni to 0, napolitana to 1))
+        )
+
+        val registrado: ResultadoSolicitud.Registrado = assertIs<ResultadoSolicitud.Registrado>(resultado)
+        assertEquals(listOf(ItemPedido(producto = napolitana, cantidad = 1)), registrado.pedido.items)
+    }
+
+    @Test
+    fun soloCantidadesEnCeroMarcanProductoInvalido() {
+        val registro: RegistroPedidoService = crearRegistro()
+
+        val resultado: ResultadoSolicitud = registro.registrar(
+            solicitudDeAna(cantidades = mapOf(pepperoni to 0, napolitana to 0))
+        )
+
+        val invalidos: ResultadoSolicitud.DatosInvalidos = assertIs<ResultadoSolicitud.DatosInvalidos>(resultado)
+        assertEquals(setOf(CampoPedido.PRODUCTO), invalidos.campos)
+    }
+
+    @Test
+    fun pizzasQueSumanMasDeCienMarcanCantidadInvalida() {
+        val registro: RegistroPedidoService = crearRegistro()
+
+        val resultado: ResultadoSolicitud = registro.registrar(
+            solicitudDeAna(cantidades = mapOf(pepperoni to 60, napolitana to 50))
+        )
+
+        val invalidos: ResultadoSolicitud.DatosInvalidos = assertIs<ResultadoSolicitud.DatosInvalidos>(resultado)
+        assertEquals(setOf(CampoPedido.CANTIDAD), invalidos.campos)
+        assertEquals(0, registro.resumen().totalPedidos)
     }
 }

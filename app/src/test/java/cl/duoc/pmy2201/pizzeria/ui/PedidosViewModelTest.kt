@@ -75,8 +75,7 @@ class PedidosViewModelTest {
         telefono = "+56931717552",
         correo = "ana@example.com",
         direccion = "Av. Siempre Viva 123",
-        producto = pepperoni,
-        cantidad = "1",
+        cantidades = mapOf(pepperoni to 1),
         notas = ""
     )
 
@@ -147,7 +146,7 @@ class PedidosViewModelTest {
         val viewModel: PedidosViewModel = crearViewModel()
         advanceUntilIdle()
 
-        viewModel.registrarPedido(solicitudValida.copy(nombre = "A", producto = null))
+        viewModel.registrarPedido(solicitudValida.copy(nombre = "A", cantidades = emptyMap()))
 
         assertIs<ResultadoSolicitud.DatosInvalidos>(viewModel.ultimoResultado.value)
         assertEquals(resumenVacio, viewModel.resumen.value)
@@ -166,7 +165,7 @@ class PedidosViewModelTest {
         val viewModel: PedidosViewModel = crearViewModel()
         advanceUntilIdle()
 
-        viewModel.registrarPedido(solicitudValida.copy(cantidad = "10"))
+        viewModel.registrarPedido(solicitudValida.copy(cantidades = mapOf(pepperoni to 10)))
 
         assertIs<ResultadoSolicitud.Registrado>(viewModel.ultimoResultado.value)
         assertEquals(mapOf<Producto, Boolean>(pepperoni to false, napolitana to true), viewModel.disponibilidad.value)

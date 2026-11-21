@@ -51,6 +51,7 @@ Estas reglas no vienen de la pauta. Las agregamos para que el flujo de la pantal
 - Mostramos "Cliente frecuente" cuando el cliente ya tenía al menos un pedido registrado en el día.
 - Cada pedido guarda su propia dirección de entrega, y el cliente conserva la de su registro. Dos pedidos solo se pueden combinar (`+`) si tienen la misma dirección de entrega, sin distinguir mayúsculas ni espacios en los extremos.
 - Una pizza está disponible si el inventario alcanza para preparar al menos 1 unidad. Lo recalculamos después de cada registro.
+- Un pedido puede tener varias pizzas. Cada pizza lleva de 1 a 100 unidades, y el total del pedido también debe estar entre 1 y 100.
 
 ## Requisitos de la semana 4
 

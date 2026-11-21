@@ -17,9 +17,15 @@ import cl.duoc.pmy2201.pizzeria.model.Pedido
 import cl.duoc.pmy2201.pizzeria.util.FormatoMoneda
 
 /**
- * Lista de los pedidos registrados en el día, cada uno en una tarjeta pequeña con id, cliente, cantidad
- * y producto del primer item y total formateado, y debajo la dirección de entrega del pedido.
- * Se usa el primer item porque el formulario registra un solo producto por pedido.
+ * Devuelve las pizzas de [items] como texto, en el orden de los items: cantidad, " x " y nombre,
+ * separados por ", ". Ejemplo: "2 x Pepperoni, 1 x Napolitana".
+ */
+fun textoPizzas(items: List<ItemPedido>): String =
+    items.joinToString(", ") { item: ItemPedido -> "${item.cantidad} x ${item.producto.nombre}" }
+
+/**
+ * Lista de los pedidos registrados en el día, cada uno en una tarjeta pequeña con id, cliente y total
+ * formateado; debajo, todas sus pizzas (ver [textoPizzas]) y la dirección de entrega del pedido.
  * Si no hay pedidos muestra un aviso.
  */
 @Composable
@@ -30,7 +36,6 @@ fun ListaPedidos(pedidos: List<Pedido>, modifier: Modifier = Modifier) {
             Text(text = stringResource(R.string.pedidos_vacio), style = MaterialTheme.typography.bodyLarge)
         } else {
             pedidos.forEach { pedido: Pedido ->
-                val item: ItemPedido = pedido.items.first()
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                         Text(
@@ -38,11 +43,13 @@ fun ListaPedidos(pedidos: List<Pedido>, modifier: Modifier = Modifier) {
                                 R.string.pedido_linea,
                                 pedido.idPedido,
                                 pedido.cliente.nombre,
-                                item.cantidad,
-                                item.producto.nombre,
                                 FormatoMoneda.formatear(pedido.calcularTotal().total)
                             ),
                             style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            text = stringResource(R.string.pedido_pizzas, textoPizzas(pedido.items)),
+                            style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
                             text = stringResource(R.string.pedido_entrega, pedido.direccionEntrega),

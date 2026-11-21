@@ -23,7 +23,12 @@ class RegistroPedidoService(
     /**
      * Registra el pedido descrito en [solicitud]:
      * - [ResultadoSolicitud.DatosInvalidos] con todos los campos inválidos, si hay alguno; no se registra nada.
-     *   Los datos del cliente se validan con [validarCliente]; además se validan el producto y la cantidad.
+     *   Los datos del cliente se validan con [validarCliente]. Las pizzas con cantidad mayor que 0 en
+     *   [SolicitudPedido.cantidades] forman los items del pedido (las que tienen 0 se ignoran):
+     *   - [CampoPedido.PRODUCTO] si no queda ningún item.
+     *   - [CampoPedido.CANTIDAD] si hay items y alguna cantidad, o la suma de todas, no cumple [esCantidadValida].
+     *     No se marca cuando no hay items, para no repetir el error de [CampoPedido.PRODUCTO].
+     * - El pedido se registra con todos los items.
      * - Si el cliente no existe (ver [ClienteService.buscar]), se registra antes de intentar el pedido,
      *   por lo que queda agregado aunque el pedido luego no se registre.
      * - La dirección del formulario, sin espacios en los extremos, se usa como dirección de entrega del pedido.
@@ -36,9 +41,12 @@ class RegistroPedidoService(
     fun registrar(solicitud: SolicitudPedido): ResultadoSolicitud {
         val telefono: String? = normalizarTelefono(solicitud.telefono)
         val correo: String? = solicitud.correo.trim().takeIf { texto: String -> texto.isNotEmpty() }
-        val producto: Producto? = solicitud.producto
-        val cantidad: Int? = solicitud.cantidad.trim().toIntOrNull()
-            ?.takeIf { valor: Int -> esCantidadValida(valor) }
+        val items: List<ItemPedido> = solicitud.cantidades
+            .filter { entrada: Map.Entry<Producto, Int> -> entrada.value > 0 }
+            .map { entrada: Map.Entry<Producto, Int> -> ItemPedido(producto = entrada.key, cantidad = entrada.value) }
+        val cantidadesValidas: Boolean =
+            items.all { item: ItemPedido -> esCantidadValida(item.cantidad) } &&
+                esCantidadValida(items.sumOf { item: ItemPedido -> item.cantidad })
 
         val camposInvalidos: Set<CampoPedido> = validarCliente(
             nombre = solicitud.nombre,
@@ -46,10 +54,9 @@ class RegistroPedidoService(
             correo = solicitud.correo,
             direccion = solicitud.direccion
         ) + buildSet {
-            if (producto == null) add(CampoPedido.PRODUCTO)
-            if (cantidad == null) add(CampoPedido.CANTIDAD)
+            if (items.isEmpty()) add(CampoPedido.PRODUCTO) else if (!cantidadesValidas) add(CampoPedido.CANTIDAD)
         }
-        if (camposInvalidos.isNotEmpty() || telefono == null || producto == null || cantidad == null) {
+        if (camposInvalidos.isNotEmpty() || telefono == null) {
             return ResultadoSolicitud.DatosInvalidos(campos = camposInvalidos)
         }
 
@@ -68,7 +75,7 @@ class RegistroPedidoService(
 
         val resultado: ResultadoRegistro = pedidoService.registrarPedido(
             cliente = cliente,
-            items = listOf(ItemPedido(producto = producto, cantidad = cantidad)),
+            items = items,
             notas = notas,
             direccionEntrega = direccion
         )

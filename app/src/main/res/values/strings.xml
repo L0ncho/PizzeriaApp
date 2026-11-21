@@ -17,12 +17,15 @@
     <string name="campo_direccion">Dirección de entrega</string>
     <string name="boton_continuar">Continuar</string>
 
-    <string name="titulo_elegir_pizza">Elige la pizza</string>
+    <string name="titulo_elegir_pizza">Elige las pizzas</string>
     <string name="boton_cambiar_datos">Cambiar datos</string>
-    <string name="cliente_seleccionado">Cliente: %1$s · %2$s</string>
+    <string name="cliente_nombre">Cliente: %1$s</string>
+    <string name="cliente_telefono">Teléfono: %1$s</string>
     <string name="disponible">Disponible</string>
     <string name="no_disponible">No disponible</string>
-    <string name="campo_cantidad">Cantidad</string>
+    <string name="quitar_pizza">Quitar una %1$s</string>
+    <string name="agregar_pizza">Agregar una %1$s</string>
+    <string name="total_pizzas">Total de pizzas: %1$d</string>
     <string name="campo_notas">Notas (opcional)</string>
     <string name="boton_registrar">Registrar pedido</string>
 
@@ -30,8 +33,8 @@
     <string name="error_telefono">Teléfono inválido (ej.: +56 9 1234 5678)</string>
     <string name="error_correo">Correo inválido</string>
     <string name="error_direccion">Mínimo 5 caracteres y una letra</string>
-    <string name="error_pizza">Selecciona una pizza</string>
-    <string name="error_cantidad">Cantidad entre 1 y 100</string>
+    <string name="error_pizza">Agrega al menos una pizza</string>
+    <string name="error_cantidad">El total debe estar entre 1 y 100 pizzas</string>
 
     <string name="mensaje_registrado">Pedido #%1$d registrado para %2$s. Total: %3$s</string>
     <string name="mensaje_cliente_frecuente">Cliente frecuente</string>
@@ -42,7 +45,8 @@
 
     <string name="titulo_pedidos">Pedidos registrados</string>
     <string name="pedidos_vacio">Aún no hay pedidos</string>
-    <string name="pedido_linea">#%1$d · %2$s · %3$d x %4$s · %5$s</string>
+    <string name="pedido_linea">#%1$d · %2$s · %3$s</string>
+    <string name="pedido_pizzas">%1$s</string>
     <string name="pedido_entrega">Entrega: %1$s</string>
 
     <string name="titulo_avisos">Avisos de carga</string>
