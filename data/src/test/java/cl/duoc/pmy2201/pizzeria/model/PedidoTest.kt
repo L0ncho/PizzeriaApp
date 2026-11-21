@@ -5,7 +5,9 @@ import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -184,5 +186,46 @@ class PedidoTest {
         val combinado: Pedido = primero + segundo
 
         assertEquals("Calle Oficina 789", combinado.direccionEntrega)
+    }
+
+    @Test
+    fun cambiarEstadoRecorreEnPreparacionListoEnCaminoYEntregado() {
+        val pedido: Pedido = crearPedido(idPedido = 1, cliente = ana, producto = pepperoni, cantidad = 1)
+        val recorridoEsperado: List<EstadoPedido> = listOf(
+            EstadoPedido.LISTO,
+            EstadoPedido.EN_CAMINO,
+            EstadoPedido.ENTREGADO
+        )
+
+        assertEquals(EstadoPedido.EN_PREPARACION, pedido.estado)
+        recorridoEsperado.forEach { estadoEsperado: EstadoPedido ->
+            assertEquals(estadoEsperado, pedido.siguienteEstado())
+            assertTrue(pedido.cambiarEstado())
+            assertEquals(estadoEsperado, pedido.estado)
+        }
+    }
+
+    @Test
+    fun siguienteEstadoDePedidoEntregadoEsNull() {
+        val pedido: Pedido = crearPedidoEntregado()
+
+        assertNull(pedido.siguienteEstado())
+    }
+
+    @Test
+    fun cambiarEstadoDePedidoEntregadoRetornaFalseYNoCambiaElEstado() {
+        val pedido: Pedido = crearPedidoEntregado()
+
+        val cambio: Boolean = pedido.cambiarEstado()
+
+        assertFalse(cambio)
+        assertEquals(EstadoPedido.ENTREGADO, pedido.estado)
+    }
+
+    private fun crearPedidoEntregado(): Pedido {
+        val pedido: Pedido = crearPedido(idPedido = 1, cliente = ana, producto = pepperoni, cantidad = 1)
+        repeat(3) { pedido.cambiarEstado() }
+        assertEquals(EstadoPedido.ENTREGADO, pedido.estado)
+        return pedido
     }
 }
