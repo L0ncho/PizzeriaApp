@@ -9,6 +9,9 @@ private val FORMATO_CORREO: Regex = Regex("""^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{
 private val FORMATO_TELEFONO_NORMALIZADO: Regex = Regex("""^\+56(\d)(\d{4})(\d{4})$""")
 private val FORMATO_TELEFONO_INTERNACIONAL: Regex = Regex("""^\+(?!56)(\d{2})(\d{10})$""")
 private val FORMATO_INTERNACIONAL_NORMALIZADO: Regex = Regex("""^\+(?!56)(\d{2})(\d{3})(\d{3})(\d{4})$""")
+private val FORMATO_NOMBRE: Regex = Regex("""^[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+$""")
+private const val MINIMO_LETRAS_NOMBRE: Int = 2
+private const val MINIMO_CARACTERES_DIRECCION: Int = 5
 
 /**
  * Normaliza un teléfono, sin considerar espacios:
@@ -60,3 +63,22 @@ fun esCorreoValido(texto: String): Boolean = FORMATO_CORREO.matches(texto.trim()
  * Indica si [cantidad] está dentro de [RANGO_CANTIDAD_PIZZAS].
  */
 fun esCantidadValida(cantidad: Int): Boolean = cantidad in RANGO_CANTIDAD_PIZZAS
+
+/**
+ * Indica si [texto], sin espacios en los extremos, tiene solo letras (incluidas las vocales con tilde, la ü y la ñ)
+ * y espacios, con al menos 2 letras. Por ejemplo, `"José Ñúñez"` y `"Matías Agüero"` son válidos y `"Ana2"` no.
+ */
+fun esNombreValido(texto: String): Boolean {
+    val recortado: String = texto.trim()
+    val cantidadLetras: Int = recortado.count { caracter: Char -> caracter != ' ' }
+    return FORMATO_NOMBRE.matches(recortado) && cantidadLetras >= MINIMO_LETRAS_NOMBRE
+}
+
+/**
+ * Indica si [texto], sin espacios en los extremos, tiene al menos 5 caracteres y al menos una letra,
+ * para descartar direcciones demasiado cortas o formadas solo por números.
+ */
+fun esDireccionValida(texto: String): Boolean {
+    val recortado: String = texto.trim()
+    return recortado.length >= MINIMO_CARACTERES_DIRECCION && recortado.any { caracter: Char -> caracter.isLetter() }
+}

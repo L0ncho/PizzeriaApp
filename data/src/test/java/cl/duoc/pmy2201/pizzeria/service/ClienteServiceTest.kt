@@ -74,4 +74,48 @@ class ClienteServiceTest {
 
         assertNull(encontrado)
     }
+
+    @Test
+    fun ultimoRegistradoEsNullSinClientes() {
+        val clienteService: ClienteService = ClienteService()
+
+        val ultimo: Cliente? = clienteService.ultimoRegistrado()
+
+        assertNull(ultimo)
+    }
+
+    @Test
+    fun ultimoRegistradoEsElSegundoTrasRegistrarDos() {
+        val clienteService: ClienteService = ClienteService()
+        val pedro: Cliente = Cliente(
+            nombre = "Pedro Soto",
+            telefono = "+56987654321",
+            correo = "pedro@example.com",
+            direccion = "Calle Falsa 456"
+        )
+        clienteService.registrar(ana)
+        clienteService.registrar(pedro)
+
+        val ultimo: Cliente? = clienteService.ultimoRegistrado()
+
+        assertSame(pedro, ultimo)
+    }
+
+    @Test
+    fun registrarOtraVezAlPrimeroNoCambiaElUltimoRegistrado() {
+        val clienteService: ClienteService = ClienteService()
+        val pedro: Cliente = Cliente(
+            nombre = "Pedro Soto",
+            telefono = "+56987654321",
+            correo = "pedro@example.com",
+            direccion = "Calle Falsa 456"
+        )
+        clienteService.registrar(ana)
+        clienteService.registrar(pedro)
+        clienteService.registrar(ana)
+
+        val ultimo: Cliente? = clienteService.ultimoRegistrado()
+
+        assertSame(pedro, ultimo)
+    }
 }

@@ -90,4 +90,44 @@ class ValidacionesTest {
         assertFalse(ceroEsValido)
         assertFalse(cientoUnoEsValido)
     }
+
+    @Test
+    fun nombresConLetrasTildesYEnieSonValidos() {
+        val anaEsValido: Boolean = esNombreValido("Ana")
+        val joseEsValido: Boolean = esNombreValido("José Ñúñez")
+        val matiasEsValido: Boolean = esNombreValido("Matías Agüero")
+
+        assertTrue(anaEsValido)
+        assertTrue(joseEsValido)
+        assertTrue(matiasEsValido)
+    }
+
+    @Test
+    fun nombresCortosConNumerosOEnBlancoNoSonValidos() {
+        val unaLetraEsValido: Boolean = esNombreValido("A")
+        val conNumeroEsValido: Boolean = esNombreValido("Ana2")
+        val enBlancoEsValido: Boolean = esNombreValido("   ")
+
+        assertFalse(unaLetraEsValido)
+        assertFalse(conNumeroEsValido)
+        assertFalse(enBlancoEsValido)
+    }
+
+    @Test
+    fun direccionConCincoCaracteresYUnaLetraEsValida() {
+        val esValida: Boolean = esDireccionValida("Calle 1")
+
+        assertTrue(esValida)
+    }
+
+    @Test
+    fun direccionCortaSoloNumerosOEnBlancoNoEsValida() {
+        val cortaEsValida: Boolean = esDireccionValida("Av 1")
+        val soloNumerosEsValida: Boolean = esDireccionValida("12345")
+        val enBlancoEsValida: Boolean = esDireccionValida("   ")
+
+        assertFalse(cortaEsValida)
+        assertFalse(soloNumerosEsValida)
+        assertFalse(enBlancoEsValida)
+    }
 }

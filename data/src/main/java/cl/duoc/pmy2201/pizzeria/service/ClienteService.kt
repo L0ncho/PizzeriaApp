@@ -29,4 +29,11 @@ class ClienteService {
 
     /** Retorna una copia de los clientes registrados en el día. */
     fun clientesDelDia(): Set<Cliente> = clientes.toSet()
+
+    /**
+     * Retorna el último cliente agregado con [registrar], o null si no hay clientes.
+     * [mutableSetOf] mantiene el orden de inserción, y registrar un cliente que ya existía no lo agrega
+     * de nuevo, por lo que un cliente repetido no cambia el último.
+     */
+    fun ultimoRegistrado(): Cliente? = clientes.lastOrNull()
 }
