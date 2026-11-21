@@ -4,4 +4,42 @@
     <string name="titulo_carta">Carta disponible</string>
     <string name="leyenda_promocionable">★: Participa en promociones</string>
     <string name="carta_vacia">No hay pizzas disponibles.</string>
+
+    <string name="titulo_resumen">Resumen del día</string>
+    <string name="resumen_clientes">Clientes registrados: %1$d</string>
+    <string name="resumen_pedidos">Pedidos realizados: %1$d</string>
+    <string name="resumen_ultimo_cliente">Último cliente registrado: %1$s</string>
+    <string name="resumen_sin_clientes">Aún no hay clientes registrados</string>
+    <string name="cargando">Cargando datos…</string>
+
+    <string name="titulo_formulario">Nuevo pedido</string>
+    <string name="campo_nombre">Nombre</string>
+    <string name="campo_telefono">Teléfono</string>
+    <string name="campo_correo">Correo (opcional)</string>
+    <string name="campo_direccion">Dirección de entrega</string>
+    <string name="campo_pizza">Pizza</string>
+    <string name="campo_cantidad">Cantidad</string>
+    <string name="campo_notas">Notas (opcional)</string>
+    <string name="boton_registrar">Registrar pedido</string>
+
+    <string name="error_nombre">Solo letras, mínimo 2</string>
+    <string name="error_telefono">Teléfono inválido (ej.: +56 9 1234 5678)</string>
+    <string name="error_correo">Correo inválido</string>
+    <string name="error_direccion">Mínimo 5 caracteres y una letra</string>
+    <string name="error_pizza">Selecciona una pizza</string>
+    <string name="error_cantidad">Cantidad entre 1 y 100</string>
+
+    <string name="mensaje_registrado">Pedido #%1$d registrado para %2$s. Total: %3$s</string>
+    <string name="mensaje_cliente_frecuente">Cliente frecuente</string>
+    <string name="mensaje_sin_stock_cliente_agregado">Cliente agregado, sin pedido: faltan ingredientes (%1$s)</string>
+    <string name="mensaje_sin_stock">Pedido no registrado: faltan ingredientes (%1$s)</string>
+    <string name="mensaje_sin_capacidad_cliente_agregado">Cliente agregado, sin pedido: se alcanzó el máximo de pedidos del día</string>
+    <string name="mensaje_sin_capacidad">Pedido no registrado: se alcanzó el máximo de pedidos del día</string>
+
+    <string name="titulo_pedidos">Pedidos registrados</string>
+    <string name="pedidos_vacio">Aún no hay pedidos</string>
+    <string name="pedido_linea">#%1$d · %2$s · %3$d x %4$s · %5$s</string>
+    <string name="pedido_entrega">Entrega: %1$s</string>
+
+    <string name="titulo_avisos">Avisos de carga</string>
 </resources>

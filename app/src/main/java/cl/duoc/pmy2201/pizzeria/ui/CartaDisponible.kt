@@ -28,11 +28,11 @@ fun textoProductoCarta(producto: Producto): String {
  * Muestra la carta disponible: el título, un texto por cada producto
  * (ver [textoProductoCarta]) y la leyenda de promocionables.
  *
- * Si [productos] está vacío muestra un aviso de carta vacía, y si hay [errores]
- * de carga los muestra uno por línea al final.
+ * Si [productos] está vacío muestra un aviso de carta vacía. Los errores de carga se muestran
+ * aparte, en [AvisosCarga].
  */
 @Composable
-fun CartaDisponible(productos: List<Producto>, errores: List<String>, modifier: Modifier = Modifier) {
+fun CartaDisponible(productos: List<Producto>, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.titulo_carta),
@@ -46,9 +46,6 @@ fun CartaDisponible(productos: List<Producto>, errores: List<String>, modifier: 
                 Text(text = textoProductoCarta(producto), style = MaterialTheme.typography.bodyLarge)
             }
             Text(text = stringResource(R.string.leyenda_promocionable), style = MaterialTheme.typography.bodySmall)
-        }
-        errores.forEach { error: String ->
-            Text(text = error, style = MaterialTheme.typography.bodySmall)
         }
     }
 }
