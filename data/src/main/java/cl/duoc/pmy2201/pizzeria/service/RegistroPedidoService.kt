@@ -26,6 +26,8 @@ class RegistroPedidoService(
      *   El correo vacío o en blanco se considera "sin correo" y es válido.
      * - Si el cliente no existe (ver [ClienteService.buscar]), se registra antes de intentar el pedido,
      *   por lo que queda agregado aunque el pedido luego no se registre.
+     * - La dirección del formulario, sin espacios en los extremos, se usa como dirección de entrega del pedido.
+     *   Si el cliente ya estaba registrado, conserva su dirección original: pedir a otra dirección no la modifica.
      * - [ResultadoSolicitud.Registrado] si el pedido se registró; el cliente es recurrente si ya tenía
      *   al menos un pedido en el día antes de este.
      * - [ResultadoSolicitud.SinStock] si faltan ingredientes, y [ResultadoSolicitud.SinCapacidad]
@@ -51,13 +53,14 @@ class RegistroPedidoService(
         }
 
         val nombre: String = solicitud.nombre.trim()
+        val direccion: String = solicitud.direccion.trim()
         val existente: Cliente? = clienteService.buscar(nombre = nombre, correo = correo, telefono = telefono)
         val clienteAgregado: Boolean = existente == null
         val cliente: Cliente = existente ?: registrarCliente(
             nombre = nombre,
             telefono = telefono,
             correo = correo,
-            direccion = solicitud.direccion.trim()
+            direccion = direccion
         )
         val clienteRecurrente: Boolean = pedidoService.pedidosDelDia().any { pedido: Pedido -> pedido.cliente == cliente }
         val notas: String? = solicitud.notas.trim().takeIf { texto: String -> texto.isNotEmpty() }
@@ -65,7 +68,8 @@ class RegistroPedidoService(
         val resultado: ResultadoRegistro = pedidoService.registrarPedido(
             cliente = cliente,
             items = listOf(ItemPedido(producto = producto, cantidad = cantidad)),
-            notas = notas
+            notas = notas,
+            direccionEntrega = direccion
         )
         return when (resultado) {
             is ResultadoRegistro.Registrado ->

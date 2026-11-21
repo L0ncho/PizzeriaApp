@@ -17,13 +17,19 @@ class PedidoService(
     private var cantidadPedidos: Int = 0
 
     /**
-     * Registra un pedido con los [items] del [cliente]:
+     * Registra un pedido con los [items] del [cliente], para entregar en [direccionEntrega]
+     * (por defecto, la dirección del cliente):
      * - [ResultadoRegistro.SinCapacidad] si ya se alcanzó [CAPACIDAD_PEDIDOS_DIA]; no se modifica nada.
      * - [ResultadoRegistro.Rechazado] si faltan ingredientes; no se modifica el inventario.
      * - [ResultadoRegistro.Registrado] si hay ingredientes: descuenta las cantidades acumuladas de todos
      *   los items en una sola operación, crea el pedido, le asigna el repartidor disponible más cercano y lo guarda.
      */
-    fun registrarPedido(cliente: Cliente, items: List<ItemPedido>, notas: String?): ResultadoRegistro {
+    fun registrarPedido(
+        cliente: Cliente,
+        items: List<ItemPedido>,
+        notas: String?,
+        direccionEntrega: String = cliente.direccion
+    ): ResultadoRegistro {
         if (cantidadPedidos >= CAPACIDAD_PEDIDOS_DIA) return ResultadoRegistro.SinCapacidad
 
         return when (val verificacion: ResultadoVerificacion = inventarioService.verificar(items)) {
@@ -35,7 +41,8 @@ class PedidoService(
                     cliente = cliente,
                     items = items,
                     notas = notas,
-                    repartidor = asignacionRepartidorService.asignar()
+                    repartidor = asignacionRepartidorService.asignar(),
+                    direccionEntrega = direccionEntrega
                 )
                 arregloPedidos[cantidadPedidos] = pedido
                 cantidadPedidos++

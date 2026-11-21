@@ -11,6 +11,8 @@ import java.time.LocalDate
  * @property notas Notas opcionales del pedido.
  * @property repartidor Repartidor asignado, o null si no hay ninguno disponible.
  * @property fecha Fecha del pedido; por defecto, el día actual.
+ * @property direccionEntrega Dirección donde se entrega este pedido; por defecto, la dirección del [cliente].
+ * Es propia de cada pedido para que un cliente registrado pueda pedir a otra dirección sin cambiar la suya.
  */
 class Pedido(
     val idPedido: Int,
@@ -18,7 +20,8 @@ class Pedido(
     val items: List<ItemPedido>,
     val notas: String?,
     var repartidor: Repartidor? = null,
-    val fecha: LocalDate = LocalDate.now()
+    val fecha: LocalDate = LocalDate.now(),
+    val direccionEntrega: String = cliente.direccion
 ) {
 
     var estado: EstadoPedido = EstadoPedido.EN_PREPARACION
@@ -50,7 +53,8 @@ class Pedido(
 
     /**
      * Combina este pedido con [otro] del mismo cliente usando el operador `+`.
-     * El nuevo pedido recibe un identificador propio desde [ID_INICIAL_COMBINADOS], usa el [cliente] y la [fecha] de este pedido, no tiene repartidor
+     * El nuevo pedido recibe un identificador propio desde [ID_INICIAL_COMBINADOS], usa el [cliente], la [fecha]
+     * y la [direccionEntrega] de este pedido, no tiene repartidor
      * y parte en estado [EstadoPedido.EN_PREPARACION] (En preparación).
      * Los items se suman; si un producto está en ambos (según `==`), queda una sola línea con la cantidad sumada.
      * Las notas que no son null se unen con " / ". El total se recalcula con [calcularTotal], incluidos los descuentos.
@@ -58,12 +62,17 @@ class Pedido(
      *
      * @throws IllegalArgumentException si los clientes de ambos pedidos no son iguales (`==`).
      * @throws IllegalArgumentException si los pedidos tienen fechas distintas.
+     * @throws IllegalArgumentException si los pedidos tienen direcciones de entrega distintas
+     * (sin considerar espacios en los extremos ni mayúsculas).
      */
     operator fun plus(otro: Pedido): Pedido {
         require(cliente == otro.cliente) {
             "No se pueden combinar los pedidos $idPedido y ${otro.idPedido}: pertenecen a clientes distintos."
         }
         require(fecha == otro.fecha) { "No se pueden combinar los pedidos $idPedido y ${otro.idPedido}: son de fechas distintas." }
+        require(direccionEntrega.trim().equals(otro.direccionEntrega.trim(), ignoreCase = true)) {
+            "No se pueden combinar los pedidos $idPedido y ${otro.idPedido}: tienen direcciones de entrega distintas."
+        }
         val cantidadesPorProducto: Map<Producto, Int> = (items + otro.items)
             .groupingBy { item: ItemPedido -> item.producto }
             .fold(0) { acumulado: Int, item: ItemPedido -> acumulado + item.cantidad }
@@ -79,7 +88,8 @@ class Pedido(
             items = itemsCombinados,
             notas = notasCombinadas,
             repartidor = null,
-            fecha = fecha
+            fecha = fecha,
+            direccionEntrega = direccionEntrega
         )
     }
 

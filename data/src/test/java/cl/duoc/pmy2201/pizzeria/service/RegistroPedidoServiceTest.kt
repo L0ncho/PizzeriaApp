@@ -65,12 +65,13 @@ class RegistroPedidoServiceTest {
         correo: String = "ana@example.com",
         telefono: String = "+56931717552",
         producto: Producto? = pepperoni,
-        cantidad: String = "1"
+        cantidad: String = "1",
+        direccion: String = "Av. Siempre Viva 123"
     ): SolicitudPedido = SolicitudPedido(
         nombre = "Ana Pérez",
         telefono = telefono,
         correo = correo,
-        direccion = "Av. Siempre Viva 123",
+        direccion = direccion,
         producto = producto,
         cantidad = cantidad,
         notas = ""
@@ -182,5 +183,17 @@ class RegistroPedidoServiceTest {
         val resumen: ResumenDia = registro.resumen()
         assertEquals(1, resumen.totalClientes)
         assertEquals(1, resumen.totalPedidos)
+    }
+
+    @Test
+    fun clienteRegistradoQuePideAOtraDireccionConservaSuDireccionOriginal() {
+        val registro: RegistroPedidoService = crearRegistro()
+        registro.registrar(solicitudDeAna(direccion = "Av. Siempre Viva 123"))
+
+        val resultado: ResultadoSolicitud = registro.registrar(solicitudDeAna(direccion = "  Calle Oficina 789 "))
+
+        val registrado: ResultadoSolicitud.Registrado = assertIs<ResultadoSolicitud.Registrado>(resultado)
+        assertEquals("Calle Oficina 789", registrado.pedido.direccionEntrega)
+        assertEquals("Av. Siempre Viva 123", registrado.pedido.cliente.direccion)
     }
 }

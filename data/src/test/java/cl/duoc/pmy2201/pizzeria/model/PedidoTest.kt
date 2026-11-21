@@ -137,4 +137,52 @@ class PedidoTest {
         assertEquals(pedido.items, productos)
         assertEquals(pedido.calcularTotal().total, total, tolerancia)
     }
+
+    @Test
+    fun pedidoSinDireccionEntregaUsaLaDireccionDelCliente() {
+        val pedido: Pedido = crearPedido(idPedido = 1, cliente = ana, producto = pepperoni, cantidad = 1)
+
+        assertEquals("Av. Siempre Viva 123", pedido.direccionEntrega)
+    }
+
+    @Test
+    fun sumarPedidosConDireccionesDeEntregaDistintasLanzaExcepcion() {
+        val pedidoCasa: Pedido = crearPedido(idPedido = 1, cliente = ana, producto = pepperoni, cantidad = 1)
+        val pedidoOficina: Pedido = Pedido(
+            idPedido = 2,
+            cliente = ana,
+            items = listOf(ItemPedido(producto = napolitana, cantidad = 1)),
+            notas = null,
+            fecha = fecha,
+            direccionEntrega = "Calle Oficina 789"
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            pedidoCasa + pedidoOficina
+        }
+    }
+
+    @Test
+    fun sumarPedidosConMismaDireccionConOtrasMayusculasYEspaciosConservaLaDelPrimero() {
+        val primero: Pedido = Pedido(
+            idPedido = 1,
+            cliente = ana,
+            items = listOf(ItemPedido(producto = pepperoni, cantidad = 1)),
+            notas = null,
+            fecha = fecha,
+            direccionEntrega = "Calle Oficina 789"
+        )
+        val segundo: Pedido = Pedido(
+            idPedido = 2,
+            cliente = ana,
+            items = listOf(ItemPedido(producto = napolitana, cantidad = 1)),
+            notas = null,
+            fecha = fecha,
+            direccionEntrega = "  calle OFICINA 789 "
+        )
+
+        val combinado: Pedido = primero + segundo
+
+        assertEquals("Calle Oficina 789", combinado.direccionEntrega)
+    }
 }
