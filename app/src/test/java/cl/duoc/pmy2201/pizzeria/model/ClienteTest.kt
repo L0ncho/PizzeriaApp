@@ -49,6 +49,41 @@ class ClienteTest {
     }
 
     @Test
+    fun sinCorreoMismoNombreYMismoTelefonoEscritoDistintoSonIgualesYTienenMismoHash() {
+        val original: Cliente = crearCliente(correo = null, telefono = "+56931717552")
+        val variante: Cliente = crearCliente(correo = null, telefono = "+56 9 3171 7552")
+
+        assertEquals(original, variante)
+        assertEquals(original.hashCode(), variante.hashCode())
+    }
+
+    @Test
+    fun sinCorreoMismoNombreYDistintoTelefonoNoSonIguales() {
+        val original: Cliente = crearCliente(correo = null, telefono = "+56931717552")
+        val otroTelefono: Cliente = crearCliente(correo = null, telefono = "+56223456789")
+
+        assertNotEquals(original, otroTelefono)
+    }
+
+    @Test
+    fun conCorreoYSinCorreoConMismoNombreYTelefonoNoSonIguales() {
+        val conCorreo: Cliente = crearCliente(correo = "ana@example.com", telefono = "+56931717552")
+        val sinCorreo: Cliente = crearCliente(correo = null, telefono = "+56931717552")
+
+        assertNotEquals(conCorreo, sinCorreo)
+    }
+
+    @Test
+    fun setConDosClientesSinCorreoYDistintoTelefonoQuedaConDosElementos() {
+        val clientes: Set<Cliente> = setOf(
+            crearCliente(correo = null, telefono = "+56931717552"),
+            crearCliente(correo = null, telefono = "+56223456789")
+        )
+
+        assertEquals(2, clientes.size)
+    }
+
+    @Test
     fun desestructuracionEntregaNombreCorreoYTelefono() {
         val cliente: Cliente = crearCliente(nombre = "Ana Pérez", correo = "ana@example.com", telefono = "+56931717552")
 

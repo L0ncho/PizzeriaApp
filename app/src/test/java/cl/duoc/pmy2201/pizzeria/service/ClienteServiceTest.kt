@@ -4,6 +4,7 @@ import cl.duoc.pmy2201.pizzeria.model.Cliente
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -33,8 +34,44 @@ class ClienteServiceTest {
         val clienteService: ClienteService = ClienteService()
         clienteService.registrar(ana)
 
-        val encontrado: Cliente? = clienteService.buscar(nombre = "ana pérez", correo = "ANA@example.com")
+        val encontrado: Cliente? = clienteService.buscar(
+            nombre = "ana pérez",
+            correo = "ANA@example.com",
+            telefono = "+56931717552"
+        )
 
         assertSame(ana, encontrado)
+    }
+
+    @Test
+    fun buscarClienteSinCorreoPorNombreYTelefonoLoEncuentra() {
+        val clienteService: ClienteService = ClienteService()
+        val pedroSinCorreo: Cliente = Cliente(
+            nombre = "Pedro Soto",
+            telefono = "+56987654321",
+            correo = null,
+            direccion = "Calle Falsa 456"
+        )
+        clienteService.registrar(pedroSinCorreo)
+
+        val encontrado: Cliente? = clienteService.buscar(nombre = "pedro soto", correo = null, telefono = "+56 9 8765 4321")
+
+        assertSame(pedroSinCorreo, encontrado)
+    }
+
+    @Test
+    fun buscarClienteSinCorreoConOtroTelefonoRetornaNull() {
+        val clienteService: ClienteService = ClienteService()
+        val pedroSinCorreo: Cliente = Cliente(
+            nombre = "Pedro Soto",
+            telefono = "+56987654321",
+            correo = null,
+            direccion = "Calle Falsa 456"
+        )
+        clienteService.registrar(pedroSinCorreo)
+
+        val encontrado: Cliente? = clienteService.buscar(nombre = "Pedro Soto", correo = null, telefono = "+56911111111")
+
+        assertNull(encontrado)
     }
 }
