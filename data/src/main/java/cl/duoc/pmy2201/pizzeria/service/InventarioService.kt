@@ -2,6 +2,7 @@ package cl.duoc.pmy2201.pizzeria.service
 
 import cl.duoc.pmy2201.pizzeria.data.InventarioRepository
 import cl.duoc.pmy2201.pizzeria.model.ItemPedido
+import cl.duoc.pmy2201.pizzeria.model.Producto
 
 /**
  * Calcula, verifica, descuenta y reabastece los ingredientes del inventario.
@@ -58,6 +59,13 @@ class InventarioService(
             ResultadoVerificacion.Insuficiente(faltantes = faltantes.toMap())
         }
     }
+
+    /**
+     * Indica si el inventario alcanza para preparar una unidad de [producto] (ver [verificar]);
+     * no modifica el inventario.
+     */
+    fun puedePreparar(producto: Producto): Boolean =
+        verificar(listOf(ItemPedido(producto = producto, cantidad = 1))) == ResultadoVerificacion.Disponible
 
     /**
      * Descuenta del inventario las cantidades [necesarios] en una sola operación de todo o nada:

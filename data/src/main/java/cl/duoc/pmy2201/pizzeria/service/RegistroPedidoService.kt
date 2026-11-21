@@ -23,7 +23,7 @@ class RegistroPedidoService(
     /**
      * Registra el pedido descrito en [solicitud]:
      * - [ResultadoSolicitud.DatosInvalidos] con todos los campos inválidos, si hay alguno; no se registra nada.
-     *   El correo vacío o en blanco se considera "sin correo" y es válido.
+     *   Los datos del cliente se validan con [validarCliente]; además se validan el producto y la cantidad.
      * - Si el cliente no existe (ver [ClienteService.buscar]), se registra antes de intentar el pedido,
      *   por lo que queda agregado aunque el pedido luego no se registre.
      * - La dirección del formulario, sin espacios en los extremos, se usa como dirección de entrega del pedido.
@@ -40,11 +40,12 @@ class RegistroPedidoService(
         val cantidad: Int? = solicitud.cantidad.trim().toIntOrNull()
             ?.takeIf { valor: Int -> esCantidadValida(valor) }
 
-        val camposInvalidos: Set<CampoPedido> = buildSet {
-            if (!esNombreValido(solicitud.nombre)) add(CampoPedido.NOMBRE)
-            if (telefono == null) add(CampoPedido.TELEFONO)
-            if (correo != null && !esCorreoValido(correo)) add(CampoPedido.CORREO)
-            if (!esDireccionValida(solicitud.direccion)) add(CampoPedido.DIRECCION)
+        val camposInvalidos: Set<CampoPedido> = validarCliente(
+            nombre = solicitud.nombre,
+            telefono = solicitud.telefono,
+            correo = solicitud.correo,
+            direccion = solicitud.direccion
+        ) + buildSet {
             if (producto == null) add(CampoPedido.PRODUCTO)
             if (cantidad == null) add(CampoPedido.CANTIDAD)
         }
@@ -79,6 +80,25 @@ class RegistroPedidoService(
                 clienteAgregado = clienteAgregado
             )
             ResultadoRegistro.SinCapacidad -> ResultadoSolicitud.SinCapacidad(clienteAgregado = clienteAgregado)
+        }
+    }
+
+    /**
+     * Valida solo los datos del cliente y retorna los campos inválidos, o un conjunto vacío si todos son válidos.
+     * Solo puede retornar [CampoPedido.NOMBRE], [CampoPedido.TELEFONO], [CampoPedido.CORREO] y [CampoPedido.DIRECCION].
+     * Permite revisar al cliente antes de elegir la pizza; [registrar] usa estas mismas reglas.
+     * - Nombre: [esNombreValido].
+     * - Teléfono: debe poder normalizarse con [normalizarTelefono].
+     * - Correo: vacío o en blanco se considera "sin correo" y es válido; si no, [esCorreoValido].
+     * - Dirección: [esDireccionValida].
+     */
+    fun validarCliente(nombre: String, telefono: String, correo: String, direccion: String): Set<CampoPedido> {
+        val correoRecortado: String = correo.trim()
+        return buildSet {
+            if (!esNombreValido(nombre)) add(CampoPedido.NOMBRE)
+            if (normalizarTelefono(telefono) == null) add(CampoPedido.TELEFONO)
+            if (correoRecortado.isNotEmpty() && !esCorreoValido(correoRecortado)) add(CampoPedido.CORREO)
+            if (!esDireccionValida(direccion)) add(CampoPedido.DIRECCION)
         }
     }
 

@@ -186,6 +186,37 @@ class RegistroPedidoServiceTest {
     }
 
     @Test
+    fun validarClienteConDatosInvalidosRetornaLosCuatroCampos() {
+        val registro: RegistroPedidoService = crearRegistro()
+
+        val campos: Set<CampoPedido> = registro.validarCliente(
+            nombre = "A",
+            telefono = "123",
+            correo = "malo",
+            direccion = "Av 1"
+        )
+
+        assertEquals(
+            setOf(CampoPedido.NOMBRE, CampoPedido.TELEFONO, CampoPedido.CORREO, CampoPedido.DIRECCION),
+            campos
+        )
+    }
+
+    @Test
+    fun validarClienteConDatosValidosRetornaVacio() {
+        val registro: RegistroPedidoService = crearRegistro()
+
+        val campos: Set<CampoPedido> = registro.validarCliente(
+            nombre = "Ana Pérez",
+            telefono = "+56 9 3171 7552",
+            correo = "ana@example.com",
+            direccion = "Av. Siempre Viva 123"
+        )
+
+        assertTrue(campos.isEmpty())
+    }
+
+    @Test
     fun clienteRegistradoQuePideAOtraDireccionConservaSuDireccionOriginal() {
         val registro: RegistroPedidoService = crearRegistro()
         registro.registrar(solicitudDeAna(direccion = "Av. Siempre Viva 123"))

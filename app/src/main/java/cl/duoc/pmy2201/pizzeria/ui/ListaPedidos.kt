@@ -2,6 +2,9 @@ package cl.duoc.pmy2201.pizzeria.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,8 +17,8 @@ import cl.duoc.pmy2201.pizzeria.model.Pedido
 import cl.duoc.pmy2201.pizzeria.util.FormatoMoneda
 
 /**
- * Lista de los pedidos registrados en el día. Por cada pedido muestra id, cliente, cantidad y producto
- * del primer item y total formateado, y debajo la dirección de entrega del pedido.
+ * Lista de los pedidos registrados en el día, cada uno en una tarjeta pequeña con id, cliente, cantidad
+ * y producto del primer item y total formateado, y debajo la dirección de entrega del pedido.
  * Se usa el primer item porque el formulario registra un solo producto por pedido.
  * Si no hay pedidos muestra un aviso.
  */
@@ -28,22 +31,25 @@ fun ListaPedidos(pedidos: List<Pedido>, modifier: Modifier = Modifier) {
         } else {
             pedidos.forEach { pedido: Pedido ->
                 val item: ItemPedido = pedido.items.first()
-                Column {
-                    Text(
-                        text = stringResource(
-                            R.string.pedido_linea,
-                            pedido.idPedido,
-                            pedido.cliente.nombre,
-                            item.cantidad,
-                            item.producto.nombre,
-                            FormatoMoneda.formatear(pedido.calcularTotal().total)
-                        ),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = stringResource(R.string.pedido_entrega, pedido.direccionEntrega),
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                        Text(
+                            text = stringResource(
+                                R.string.pedido_linea,
+                                pedido.idPedido,
+                                pedido.cliente.nombre,
+                                item.cantidad,
+                                item.producto.nombre,
+                                FormatoMoneda.formatear(pedido.calcularTotal().total)
+                            ),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            text = stringResource(R.string.pedido_entrega, pedido.direccionEntrega),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }

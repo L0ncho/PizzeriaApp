@@ -7,7 +7,9 @@ import cl.duoc.pmy2201.pizzeria.model.Producto
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class InventarioServiceTest {
 
@@ -127,6 +129,18 @@ class InventarioServiceTest {
         }
 
         assertEquals(crearInventario(), inventario)
+    }
+
+    @Test
+    fun puedePrepararCuatroQuesosHastaQueSeAgotaElQuesoAzul() {
+        val inventarioService: InventarioService = InventarioService(InventarioRepositoryEnMemoria(crearInventario()))
+
+        val antesDelLote: Boolean = inventarioService.puedePreparar(cuatroQuesos)
+        inventarioService.prepararLote(listOf(ItemPedido(producto = cuatroQuesos, cantidad = 2)))
+        val despuesDelLote: Boolean = inventarioService.puedePreparar(cuatroQuesos)
+
+        assertTrue(antesDelLote)
+        assertFalse(despuesDelLote)
     }
 
     @Test

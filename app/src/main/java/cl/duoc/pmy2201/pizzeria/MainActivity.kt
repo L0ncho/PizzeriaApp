@@ -6,12 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
 import cl.duoc.pmy2201.pizzeria.data.LectorCsv
 import cl.duoc.pmy2201.pizzeria.model.Pedido
 import cl.duoc.pmy2201.pizzeria.model.Producto
@@ -46,19 +42,19 @@ class MainActivity : ComponentActivity() {
             val pedidos: List<Pedido> by pedidosViewModel.pedidos.observeAsState(emptyList())
             val erroresCarga: List<String> by pedidosViewModel.erroresCarga.observeAsState(emptyList())
             val ultimoResultado: ResultadoSolicitud? by pedidosViewModel.ultimoResultado.observeAsState()
+            val disponibilidad: Map<Producto, Boolean> by pedidosViewModel.disponibilidad.observeAsState(emptyMap())
             PizzeriaAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    PantallaInicio(
-                        cargando = cargando,
-                        resumen = resumen,
-                        productos = productos,
-                        pedidos = pedidos,
-                        erroresCarga = erroresCarga,
-                        ultimoResultado = ultimoResultado,
-                        onRegistrar = pedidosViewModel::registrarPedido,
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                PantallaInicio(
+                    cargando = cargando,
+                    resumen = resumen,
+                    productos = productos,
+                    disponibilidad = disponibilidad,
+                    pedidos = pedidos,
+                    erroresCarga = erroresCarga,
+                    ultimoResultado = ultimoResultado,
+                    onValidarCliente = pedidosViewModel::validarCliente,
+                    onRegistrar = pedidosViewModel::registrarPedido
+                )
             }
         }
     }

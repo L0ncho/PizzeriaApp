@@ -1,23 +1,27 @@
 <resources>
     <string name="app_name">PizzeriaApp</string>
     <string name="mensaje_bienvenida">Bienvenidos a la mejor pizzería de la ciudad</string>
-    <string name="titulo_carta">Carta disponible</string>
     <string name="leyenda_promocionable">★: Participa en promociones</string>
-    <string name="carta_vacia">No hay pizzas disponibles.</string>
 
     <string name="titulo_resumen">Resumen del día</string>
-    <string name="resumen_clientes">Clientes registrados: %1$d</string>
-    <string name="resumen_pedidos">Pedidos realizados: %1$d</string>
-    <string name="resumen_ultimo_cliente">Último cliente registrado: %1$s</string>
-    <string name="resumen_sin_clientes">Aún no hay clientes registrados</string>
+    <string name="etiqueta_clientes">Clientes registrados</string>
+    <string name="etiqueta_pedidos">Pedidos realizados</string>
+    <string name="etiqueta_ultimo_cliente">Último cliente</string>
+    <string name="sin_registros">Sin registros</string>
     <string name="cargando">Cargando datos…</string>
 
-    <string name="titulo_formulario">Nuevo pedido</string>
+    <string name="titulo_datos_cliente">Datos del cliente</string>
     <string name="campo_nombre">Nombre</string>
     <string name="campo_telefono">Teléfono</string>
     <string name="campo_correo">Correo (opcional)</string>
     <string name="campo_direccion">Dirección de entrega</string>
-    <string name="campo_pizza">Pizza</string>
+    <string name="boton_continuar">Continuar</string>
+
+    <string name="titulo_elegir_pizza">Elige la pizza</string>
+    <string name="boton_cambiar_datos">Cambiar datos</string>
+    <string name="cliente_seleccionado">Cliente: %1$s · %2$s</string>
+    <string name="disponible">Disponible</string>
+    <string name="no_disponible">No disponible</string>
     <string name="campo_cantidad">Cantidad</string>
     <string name="campo_notas">Notas (opcional)</string>
     <string name="boton_registrar">Registrar pedido</string>

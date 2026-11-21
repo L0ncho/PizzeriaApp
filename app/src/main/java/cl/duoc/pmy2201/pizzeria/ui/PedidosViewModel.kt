@@ -18,6 +18,7 @@ import cl.duoc.pmy2201.pizzeria.model.Pedido
 import cl.duoc.pmy2201.pizzeria.model.Producto
 import cl.duoc.pmy2201.pizzeria.model.ResumenDia
 import cl.duoc.pmy2201.pizzeria.service.AsignacionRepartidorService
+import cl.duoc.pmy2201.pizzeria.service.CampoPedido
 import cl.duoc.pmy2201.pizzeria.service.ClienteService
 import cl.duoc.pmy2201.pizzeria.service.InventarioService
 import cl.duoc.pmy2201.pizzeria.service.PedidoService
@@ -48,8 +49,9 @@ class PedidosViewModel(
 ) : ViewModel() {
 
     private val clienteService: ClienteService = ClienteService()
+    private val inventarioService: InventarioService = InventarioService(inventarioRepository)
     private val pedidoService: PedidoService = PedidoService(
-        inventarioService = InventarioService(inventarioRepository),
+        inventarioService = inventarioService,
         asignacionRepartidorService = AsignacionRepartidorService(repartidorRepository)
     )
     private val registroPedidoService: RegistroPedidoService = RegistroPedidoService(
@@ -65,6 +67,7 @@ class PedidosViewModel(
     )
     private val _pedidos: MutableLiveData<List<Pedido>> = MutableLiveData(emptyList())
     private val _ultimoResultado: MutableLiveData<ResultadoSolicitud?> = MutableLiveData(null)
+    private val _disponibilidad: MutableLiveData<Map<Producto, Boolean>> = MutableLiveData(emptyMap())
 
     /** true mientras se cargan los repositorios; los pedidos no se registran hasta que termine. */
     val cargando: LiveData<Boolean> = _cargando
@@ -84,26 +87,44 @@ class PedidosViewModel(
     /** Resultado del último intento de registrar un pedido, o null si aún no hay intentos. */
     val ultimoResultado: LiveData<ResultadoSolicitud?> = _ultimoResultado
 
+    /**
+     * Indica, para cada producto de la carta, si el inventario alcanza para preparar al menos una unidad.
+     * Se calcula al terminar la carga y se recalcula después de cada intento de registro.
+     */
+    val disponibilidad: LiveData<Map<Producto, Boolean>> = _disponibilidad
+
     init {
         viewModelScope.launch {
-            val carga: Pair<List<Producto>, List<String>> = withContext(dispatcherCarga) {
+            val carga: CargaInicial = withContext(dispatcherCarga) {
                 val productosCargados: List<Producto> = productoRepository.obtenerTodos()
                 inventarioRepository.obtenerInventario()
                 repartidorRepository.obtenerTodos()
                 val errores: List<String> = productoRepository.erroresDeCarga() +
                     inventarioRepository.erroresDeCarga() +
                     repartidorRepository.erroresDeCarga()
-                Pair(productosCargados, errores)
+                CargaInicial(
+                    productos = productosCargados,
+                    errores = errores,
+                    disponibilidad = calcularDisponibilidad(productosCargados)
+                )
             }
-            _productos.value = carga.first
-            _erroresCarga.value = carga.second
+            _productos.value = carga.productos
+            _erroresCarga.value = carga.errores
+            _disponibilidad.value = carga.disponibilidad
             _cargando.value = false
         }
     }
 
     /**
+     * Valida solo los datos del cliente con [RegistroPedidoService.validarCliente] y retorna los campos inválidos.
+     * Permite revisar al cliente antes de pasar a elegir la pizza; no registra nada.
+     */
+    fun validarCliente(nombre: String, telefono: String, correo: String, direccion: String): Set<CampoPedido> =
+        registroPedidoService.validarCliente(nombre = nombre, telefono = telefono, correo = correo, direccion = direccion)
+
+    /**
      * Intenta registrar el pedido de [solicitud] y publica el resultado en [ultimoResultado],
-     * junto con el [resumen] y los [pedidos] actualizados.
+     * junto con el [resumen], los [pedidos] y la [disponibilidad] actualizados.
      * No hace nada mientras [cargando] sea true, porque el inventario y los repartidores aún no están listos.
      * Se ejecuta en el hilo principal porque solo usa datos en memoria.
      */
@@ -113,7 +134,19 @@ class PedidosViewModel(
         _ultimoResultado.value = registroPedidoService.registrar(solicitud)
         _resumen.value = registroPedidoService.resumen()
         _pedidos.value = pedidoService.pedidosDelDia().toList()
+        _disponibilidad.value = calcularDisponibilidad(_productos.value ?: emptyList())
     }
+
+    /** Calcula con [InventarioService.puedePreparar] si cada producto de [productos] se puede preparar. */
+    private fun calcularDisponibilidad(productos: List<Producto>): Map<Producto, Boolean> =
+        productos.associateWith { producto: Producto -> inventarioService.puedePreparar(producto) }
+
+    /** Datos que se obtienen en el dispatcher de carga y luego se publican en el hilo principal. */
+    private data class CargaInicial(
+        val productos: List<Producto>,
+        val errores: List<String>,
+        val disponibilidad: Map<Producto, Boolean>
+    )
 
     companion object {
 

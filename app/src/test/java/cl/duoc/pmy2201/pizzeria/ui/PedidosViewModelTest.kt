@@ -62,6 +62,12 @@ class PedidosViewModelTest {
         ingredientes = mapOf("Masa" to 1, "Pepperoni" to 80)
     )
 
+    private val napolitana: PizzaClasica = PizzaClasica(
+        nombre = "Napolitana",
+        precio = 10990.0,
+        ingredientes = mapOf("Masa" to 1, "Tomate" to 150)
+    )
+
     private val resumenVacio: ResumenDia = ResumenDia(totalClientes = 0, totalPedidos = 0, nombreUltimoCliente = null)
 
     private val solicitudValida: SolicitudPedido = SolicitudPedido(
@@ -85,8 +91,10 @@ class PedidosViewModelTest {
     }
 
     private fun crearViewModel(): PedidosViewModel = PedidosViewModel(
-        productoRepository = ProductoRepositoryEnMemoria(listOf(pepperoni)),
-        inventarioRepository = InventarioRepositoryEnMemoria(mutableMapOf("Masa" to 10, "Pepperoni" to 800)),
+        productoRepository = ProductoRepositoryEnMemoria(listOf(pepperoni, napolitana)),
+        inventarioRepository = InventarioRepositoryEnMemoria(
+            mutableMapOf("Masa" to 20, "Pepperoni" to 800, "Tomate" to 1500)
+        ),
         repartidorRepository = RepartidorRepositoryEnMemoria(
             listOf(
                 Repartidor(id = 1, nombre = "Matías Rojas", telefono = "+56911111111", disponible = true, distanciaKm = 3.5)
@@ -104,7 +112,7 @@ class PedidosViewModelTest {
         advanceUntilIdle()
 
         assertEquals(false, viewModel.cargando.value)
-        assertEquals(listOf<Producto>(pepperoni), viewModel.productos.value)
+        assertEquals(listOf<Producto>(pepperoni, napolitana), viewModel.productos.value)
         assertEquals(resumenVacio, viewModel.resumen.value)
     }
 
@@ -143,5 +151,24 @@ class PedidosViewModelTest {
 
         assertIs<ResultadoSolicitud.DatosInvalidos>(viewModel.ultimoResultado.value)
         assertEquals(resumenVacio, viewModel.resumen.value)
+    }
+
+    @Test
+    fun trasLaCargaHayDisponibilidadParaCadaProducto() = runTest(dispatcher) {
+        val viewModel: PedidosViewModel = crearViewModel()
+        advanceUntilIdle()
+
+        assertEquals(mapOf<Producto, Boolean>(pepperoni to true, napolitana to true), viewModel.disponibilidad.value)
+    }
+
+    @Test
+    fun pedidoQueAgotaUnIngredienteDejaSuProductoNoDisponible() = runTest(dispatcher) {
+        val viewModel: PedidosViewModel = crearViewModel()
+        advanceUntilIdle()
+
+        viewModel.registrarPedido(solicitudValida.copy(cantidad = "10"))
+
+        assertIs<ResultadoSolicitud.Registrado>(viewModel.ultimoResultado.value)
+        assertEquals(mapOf<Producto, Boolean>(pepperoni to false, napolitana to true), viewModel.disponibilidad.value)
     }
 }

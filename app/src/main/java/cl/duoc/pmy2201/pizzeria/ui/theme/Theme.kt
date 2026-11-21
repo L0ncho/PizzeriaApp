@@ -1,57 +1,47 @@
 package cl.duoc.pmy2201.pizzeria.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+private val EsquemaAlbahacaYMasa: ColorScheme = lightColorScheme(
+    primary = Albahaca,
     onPrimary = Color.White,
+    primaryContainer = AlbahacaClaro,
+    onPrimaryContainer = AlbahacaOscuro,
+    secondary = Corteza,
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondaryContainer = CortezaClaro,
+    onSecondaryContainer = Corteza,
+    background = Masa,
+    onBackground = Tinta,
+    surface = Masa,
+    onSurface = Tinta,
+    surfaceVariant = Color.White,
+    onSurfaceVariant = TextoSecundario,
+    outline = Borde,
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color.White,
+    surfaceContainer = Color.White,
+    surfaceContainerHigh = MasaTostada,
+    surfaceContainerHighest = MasaDorada,
+    surfaceDim = MasaSombra,
+    surfaceBright = Masa
 )
 
+/**
+ * Tema de la app con la paleta "albahaca y masa".
+ *
+ * No usa color dinámico (Android 12+) ni esquema oscuro: la app es de uso interno y siempre debe verse
+ * con los colores de la pizzería, de modo que estados como disponible/no disponible o la pizza seleccionada
+ * se distingan igual en todos los equipos, sin depender del fondo de pantalla ni del modo del sistema.
+ */
 @Composable
-fun PizzeriaAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
+fun PizzeriaAppTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = EsquemaAlbahacaYMasa,
         typography = Typography,
         content = content
     )
