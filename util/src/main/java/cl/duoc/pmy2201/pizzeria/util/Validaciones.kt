@@ -1,11 +1,5 @@
 package cl.duoc.pmy2201.pizzeria.util
 
-/** Teléfono que se usa cuando no se logra obtener uno válido. */
-const val TELEFONO_POR_DEFECTO: String = "+56900000000"
-
-/** Correo que se usa cuando no se logra obtener uno válido. */
-const val CORREO_POR_DEFECTO: String = "sin.correo@example.com"
-
 /** Rango permitido de pizzas, tanto por producto como para el total del pedido. */
 val RANGO_CANTIDAD_PIZZAS: IntRange = 1..100
 
